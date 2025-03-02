@@ -7,24 +7,32 @@
       {
         options = {
           target = {
-            type = "string";
+            type = lib.types.str;
             default = "World";
             description = "Who to greet.";
           };
 
           big = {
-            type = "boolean";
+            type = lib.types.bool;
             default = false;
             description = "Whether to print a big greeting.";
           };
+
+          printer = {
+            type = lib.types.nullOr (lib.types.package);
+            default = null;
+            description = "Package used to print the greeting.";
+          };
         };
 
-        applyOptions = { target, big }:
+        applyOptions = { target, big, printer }:
           runCommand "hello" {}
             ''
               mkdir -p $out/bin
               echo "#! $shell" > $out/bin/hello
-              ${if big then ''
+              ${if printer != null then ''
+                echo "${printer}/bin/${printer.meta.mainProgram} Hello ${target}!" >> $out/bin/hello
+              '' else if big then ''
                 echo "${toilet}/bin/toilet -f smmono9 --gay Hello ${target}!" >> $out/bin/hello
               '' else ''
                 echo "echo Hello ${target}!" >> $out/bin/hello
