@@ -6,7 +6,7 @@
 
       {
         options = {
-          target = {
+          who = {
             type = lib.types.str;
             default = "World";
             description = "Who to greet.";
@@ -21,21 +21,21 @@
           printer = {
             type = lib.types.nullOr (lib.types.package);
             default = null;
-            description = "Package used to print the greeting.";
+            description = "Package used to print the greeting. Example: `nixpkgs#ponysay`";
           };
         };
 
-        applyOptions = { target, big, printer }:
+        applyOptions = { who, big, printer }:
           runCommand "hello" {}
             ''
               mkdir -p $out/bin
               echo "#! $shell" > $out/bin/hello
               ${if printer != null then ''
-                echo "${printer}/bin/${printer.meta.mainProgram} Hello ${target}!" >> $out/bin/hello
+                echo "${printer}/bin/${printer.meta.mainProgram or (lib.getName printer)} -- Hello ${who}!" >> $out/bin/hello
               '' else if big then ''
-                echo "${toilet}/bin/toilet -f smmono9 --gay Hello ${target}!" >> $out/bin/hello
+                echo "${toilet}/bin/toilet -f smmono9 --gay -- Hello ${who}!" >> $out/bin/hello
               '' else ''
-                echo "echo Hello ${target}!" >> $out/bin/hello
+                echo "echo Hello ${who}!" >> $out/bin/hello
               ''}
               chmod +x $out/bin/hello
             '';
